@@ -24,12 +24,28 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate environment variables
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-      console.error('Gmail credentials not configured');
-      console.error('GMAIL_USER:', process.env.GMAIL_USER ? 'Set' : 'Missing');
-      console.error('GMAIL_APP_PASSWORD:', process.env.GMAIL_APP_PASSWORD ? 'Set' : 'Missing');
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailPassword = process.env.GMAIL_APP_PASSWORD;
+    
+    console.log('Environment check:');
+    console.log('GMAIL_USER exists:', !!gmailUser);
+    console.log('GMAIL_APP_PASSWORD exists:', !!gmailPassword);
+    console.log('GMAIL_USER length:', gmailUser?.length || 0);
+    console.log('GMAIL_APP_PASSWORD length:', gmailPassword?.length || 0);
+    
+    if (!gmailUser || !gmailPassword) {
+      console.error('❌ Gmail credentials not configured');
+      console.error('GMAIL_USER:', gmailUser ? `Set (${gmailUser.length} chars)` : 'Missing');
+      console.error('GMAIL_APP_PASSWORD:', gmailPassword ? `Set (${gmailPassword.length} chars)` : 'Missing');
       return NextResponse.json(
-        { error: 'Email service not configured. Please contact the administrator.' },
+        { 
+          error: 'Email service not configured. Please contact the administrator.',
+          debug: {
+            hasUser: !!gmailUser,
+            hasPassword: !!gmailPassword,
+            envKeys: Object.keys(process.env).filter(k => k.includes('GMAIL'))
+          }
+        },
         { status: 500 }
       );
     }
